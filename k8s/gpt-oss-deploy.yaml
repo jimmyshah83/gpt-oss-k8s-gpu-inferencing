@@ -2,22 +2,29 @@ apiVersion: ray.io/v1
 kind: RayService
 metadata:
   name: gpt-oss-120-deploy
+  namespace: default
 spec:
   serveConfigV2: |
     applications:
-    - name: llm
+    - name: gpt-oss-120
       route_prefix: /
-      import_path:  ray-operator.config.samples.vllm.serve:model
-      deployments:
-      - name: VLLMDeployment
-        num_replicas: 1
-      runtime_env:
-        working_dir: "https://github.com/ray-project/kuberay/archive/master.zip"
-        pip: ["vllm==0.10.1+gptoss --extra-index-url https://wheels.vllm.ai/gpt-oss/  --extra-index-url https://download.pytorch.org/whl/nightly/cu128 --index-strategy unsafe-best-match"]
-        env_vars:
-          MODEL_ID: "openai/gpt-oss-20b"
-          TENSOR_PARALLELISM: "2"
-          PIPELINE_PARALLELISM: "1"
+      import_path: ray.serve.llm:build_openai_app
+      args:
+        llm_configs:
+          - model_loading_config:
+              model_id: gpt-oss-120b
+              model_name: openai/gpt-oss-120b
+            engine_kwargs:
+              dtype: float32
+              device: auto
+              max_model_length: 1024
+              gpu_memory_utilization: 0.8
+            deployment_config:
+              autoscaling_config:
+                minReplicas: 1
+                maxReplicas: 4
+                target_ongoing_requests: 64
+              max_ongoing_requests: 128
   rayClusterConfig:
     headGroupSpec:
       rayStartParams:
@@ -25,7 +32,7 @@ spec:
       template:
         spec:
           nodeSelector:
-            purpose: ray-head
+            workload: ray
           containers:
           - name: ray-head
             image: rayproject/ray-ml:2.33.0.914af0-py311
@@ -53,7 +60,7 @@ spec:
                   name: hf-token-secret                  
           tolerations:
             - effect: NoSchedule
-              key: sku
+              key: workload
               operator: Equal
               value: ray
     workerGroupSpecs:
@@ -65,7 +72,7 @@ spec:
       template:
         spec:
           nodeSelector:
-            purpose: llama-demo
+            workload: ray
           containers:
           - name: llm
             image: rayproject/ray-ml:2.33.0.914af0-py311
@@ -77,12 +84,9 @@ spec:
                   name: hf-token-secret
             resources:
               limits:
-                nvidia.com/gpu: "4"
-              requests:
-                nvidia.com/gpu: "4"
-          # Please add the following taints to the GPU node.
+                nvidia.com/gpu: "2"
           tolerations:
             - effect: NoSchedule
-              key: sku
+              key: workload
               operator: Equal
               value: gpu
