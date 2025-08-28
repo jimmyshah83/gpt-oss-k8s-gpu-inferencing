@@ -212,3 +212,6 @@ infrastructure/.terraform.lock.hcl
 infrastructure/tf.plan
 infrastructure/terraform.tfstate
 infrastructure/terraform.tfstate.backup
+
+#Secrets
+k8s/hf-token-secret.yaml

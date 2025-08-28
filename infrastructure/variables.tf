@@ -123,7 +123,7 @@ variable "gpu_pool_vm_size" {
 }
 variable "gpu_pool_node_count" {
   type    = number
-  default = 2
+  default = 1
 }
 variable "gpu_pool_os_disk_size_gb" {
   type    = number

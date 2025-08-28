@@ -41,7 +41,7 @@ module "aks" {
       mode            = "User"
       os_disk_size_gb = var.cpu_user_pool_os_disk_size_gb
       max_pods        = var.cpu_user_pool_max_pods
-      taints          = []
+      taints          = ["workload=ray:NoSchedule"]
       labels          = var.cpu_user_pool_labels
       zones           = var.zones
     },
