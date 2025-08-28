@@ -1,0 +1,8 @@
+nodeSelector:
+  workload: ray
+
+tolerations:
+  - key: workload
+    operator: Equal
+    value: ray
+    effect: NoSchedule

@@ -109,7 +109,7 @@ variable "cpu_user_pool_max_pods" {
 }
 variable "cpu_user_pool_labels" {
   type        = map(string)
-  default     = { "workload" = "cpu" }
+  default     = { "workload" = "ray" }
 }
 
 # GPU user pool

@@ -23,13 +23,7 @@ helm repo update
 kubectl create namespace ray-system --dry-run=client -o yaml | kubectl apply -f -
 
 # Install the operator
-helm install kuberay-operator kuberay/kuberay-operator -n ray-system --set manager.nodeSelector.workload=ray --set-json 'manager.tolerations=[{"key":"workload","operator":"Equal","value":"ray","effect":"NoSchedule"}]'
-
-# Upgrade if needed
-helm upgrade --install kuberay-operator kuberay/kuberay-operator \
-  -n ray-system --create-namespace \
-  --set manager.nodeSelector.workload=ray \
-  --set-json 'manager.tolerations=[{"key":"workload","operator":"Equal","value":"ray","effect":"NoSchedule"}]'
+helm install kuberay-operator kuberay/kuberay-operator -n ray-system -f k8s/kuberay-operator-values.yaml
 ```
 
 ## 2) Verify installation
