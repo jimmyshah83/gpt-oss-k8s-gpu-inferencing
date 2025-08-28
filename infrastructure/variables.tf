@@ -71,7 +71,7 @@ variable "system_pool_name" {
 }
 variable "system_pool_vm_size" {
   type    = string
-  default = "Standard_D8s_v5"
+  default = "Standard_D8s_v6"
 }
 variable "system_pool_node_count" {
   type    = number
@@ -93,7 +93,7 @@ variable "cpu_user_pool_name" {
 }
 variable "cpu_user_pool_vm_size" {
   type    = string
-  default = "Standard_D16s_v5"
+  default = "Standard_D16s_v6"
 }
 variable "cpu_user_pool_node_count" {
   type    = number

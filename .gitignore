@@ -210,3 +210,5 @@ __marimo__/
 infrastructure/.terraform/
 infrastructure/.terraform.lock.hcl
 infrastructure/tf.plan
+infrastructure/terraform.tfstate
+infrastructure/terraform.tfstate.backup
