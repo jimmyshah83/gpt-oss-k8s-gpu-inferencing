@@ -1,8 +1,14 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gpu-resources
+---
+
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: nvidia-device-plugin-daemonset
-  namespace: kube-system
+  namespace: gpu-resources
 spec:
   selector:
     matchLabels:
@@ -15,10 +21,6 @@ spec:
         name: nvidia-device-plugin-ds
     spec:
       tolerations:
-      - key: "kubernetes.azure.com/scalesetpriority"
-        operator: "Equal"
-        value: "spot"
-        effect: "NoSchedule"
       - effect: NoSchedule
         key: sku
         operator: Equal
@@ -29,7 +31,7 @@ spec:
       # See https://kubernetes.io/docs/tasks/administer-cluster/guaranteed-scheduling-critical-addon-pods/
       priorityClassName: "system-node-critical"
       containers:
-      - image: nvcr.io/nvidia/k8s-device-plugin:v0.17.0
+      - image: nvcr.io/nvidia/k8s-device-plugin:v0.17.2
         name: nvidia-device-plugin-ctr
         env:
           - name: FAIL_ON_INIT_ERROR
