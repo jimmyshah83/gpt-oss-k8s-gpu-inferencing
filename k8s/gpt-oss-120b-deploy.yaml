@@ -18,7 +18,6 @@ spec:
             - model_loading_config:
                 model_id: "gpt-oss-120b"
                 model_source: "openai/gpt-oss-120b"
-              accelerator_type: "H100"
               runtime_env:
                 env_vars:
                   VLLM_USE_V1: "1"
