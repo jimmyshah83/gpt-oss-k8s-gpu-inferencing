@@ -9,20 +9,26 @@ spec:
     - name: gpt-oss-120
       route_prefix: /
       import_path: ray.serve.llm:build_openai_app
-      args:
+    - args:
         llm_configs:
           - model_loading_config:
-              model_id: gpt-oss-120b
-              model_name: openai/gpt-oss-120b
+              model_id: "gpt-oss-120b"
+              model_name: "openai/gpt-oss-120b"
+            accelerator_type: "H100"
             engine_kwargs:
-              dtype: float32
+              dtype: "auto"
               device: auto
+              max_num_seqs: 40
               max_model_length: 1024
-              gpu_memory_utilization: 0.8
+              gpu_memory_utilization: 0.92
+              tensor_parallel_size: 2
+              pipeline_parallel_size: 1
+              enable_chunked_prefill: true
+              enable_prefix_caching: true
             deployment_config:
               autoscaling_config:
                 minReplicas: 1
-                maxReplicas: 4
+                maxReplicas: 1
                 target_ongoing_requests: 64
               max_ongoing_requests: 128
   rayClusterConfig:
@@ -35,7 +41,7 @@ spec:
             workload: ray
           containers:
           - name: ray-head
-            image: rayproject/ray-ml:2.33.0.914af0-py311
+            image: rayproject/ray-llm:2.46.0-py311-cu124
             resources:
               limits:
                 cpu: "8"
@@ -72,10 +78,10 @@ spec:
       template:
         spec:
           nodeSelector:
-            workload: ray
+            workload: gpu
           containers:
           - name: llm
-            image: rayproject/ray-ml:2.33.0.914af0-py311
+            image: rayproject/ray-llm:2.46.0-py311-cu124
             env:
             - name: HUGGING_FACE_HUB_TOKEN
               valueFrom:

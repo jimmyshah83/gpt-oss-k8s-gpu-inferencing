@@ -36,112 +36,69 @@ kubectl get pods -n ray-system
 kubectl get crd | grep -i ray
 ```
 
-## 3) Deploy a minimal RayCluster (CPU)
+## 3) Deploy a gpt-oss model
 
-Save as `raycluster-minimal.yaml` and apply it.
+`kubectl apply -f <Rayserve Deployment>`
 
-```yaml
-apiVersion: ray.io/v1
-kind: RayCluster
-metadata:
-	name: raycluster-minimal
-spec:
-	headGroupSpec:
-		serviceType: ClusterIP
-		template:
-			spec:
-				containers:
-					- name: ray-head
-						image: rayproject/ray:2.31.0-py310
-						resources:
-							requests:
-								cpu: "1"
-								memory: "2Gi"
-						ports:
-							- containerPort: 6379
-								name: gcs
-							- containerPort: 8265
-								name: dashboard
-							- containerPort: 10001
-								name: client
-						command: ["ray", "start", "--head", "--dashboard-host=0.0.0.0"]
-	workerGroupSpecs:
-		- groupName: small-group
-			replicas: 1
-			template:
-				spec:
-					containers:
-						- name: ray-worker
-							image: rayproject/ray:2.31.0-py310
-							resources:
-								requests:
-									cpu: "1"
-									memory: "2Gi"
-							command: ["ray", "start", "--address=$(RAY_HEAD_SERVICE_HOST):6379"]
+## 4) Monitor
+
+- Ray Cluster
+* Deploying ray serve should deploy a cluster and service for me
+```
+kubectl api-resources --api-group=ray.io
+kubectl get rayclusters.ray.io -A
+kubectl get rayservices.ray.io -A
+kubectl get rayjobs.ray.io -A
+
+# View the pods in the RayCluster named "raycluster-kuberay"
+kubectl get pods --selector=ray.io/cluster=raycluster-kuberay
 ```
 
-Apply and check status:
-
-```bash
-kubectl apply -f raycluster-minimal.yaml
-kubectl get rayclusters
-kubectl get pods -l ray.io/cluster=raycluster-minimal
-
-# Optional: port-forward the Ray Dashboard
-kubectl port-forward svc/raycluster-minimal-head-svc 8265:8265
-# Then open http://localhost:8265
+-  Verify the Kubernetes cluster status after deploying ray service
 ```
+# Step 4.1: List all RayService custom resources in the `default` namespace.
+kubectl get rayservice
 
-## 4) (Optional) Deploy a GPU-enabled RayCluster
+# [Example output]
+# NAME                SERVICE STATUS   NUM SERVE ENDPOINTS
+# rayservice-sample   Running          2
 
-Make sure the NVIDIA device plugin is running on your GPU nodes. Then use a worker group that requests GPUs. Adjust selectors/tolerations to match your cluster labels if needed.
+# Step 4.2: List all RayCluster custom resources in the `default` namespace.
+kubectl get raycluster
 
-```yaml
-apiVersion: ray.io/v1
-kind: RayCluster
-metadata:
-	name: raycluster-gpu
-spec:
-	headGroupSpec:
-		serviceType: ClusterIP
-		template:
-			spec:
-				containers:
-					- name: ray-head
-						image: rayproject/ray:2.31.0-py310
-						resources:
-							requests:
-								cpu: "1"
-								memory: "2Gi"
-						command: ["ray", "start", "--head", "--dashboard-host=0.0.0.0"]
-	workerGroupSpecs:
-		- groupName: gpu-group
-			replicas: 1
-			template:
-				spec:
-					# Example: select GPU nodes (update to your cluster's labels if different)
-					# nodeSelector:
-					#   nvidia.com/gpu.present: "true"
-					containers:
-						- name: ray-worker
-							image: rayproject/ray:2.31.0-py310
-							resources:
-								limits:
-									nvidia.com/gpu: 1
-								requests:
-									cpu: "2"
-									memory: "8Gi"
-							env:
-								- name: NVIDIA_VISIBLE_DEVICES
-									value: "all"
-							command: ["ray", "start", "--address=$(RAY_HEAD_SERVICE_HOST):6379"]
-```
+# [Example output]
+# NAME                      DESIRED WORKERS   AVAILABLE WORKERS   CPUS    MEMORY   GPUS   STATUS   AGE
+# rayservice-sample-cxm7t   1                 1                   2500m   4Gi      0      ready    79s
 
-Apply and verify:
+# Step 4.3: List all Ray Pods in the `default` namespace.
+kubectl get pods -l=ray.io/is-ray-node=yes
 
-```bash
-kubectl apply -f raycluster-gpu.yaml
-kubectl get pods -l ray.io/cluster=raycluster-gpu
+# [Example output]
+# NAME                                               READY   STATUS    RESTARTS   AGE
+# rayservice-sample-cxm7t-head                       1/1     Running   0          3m5s
+# rayservice-sample-cxm7t-small-group-worker-8hrgg   1/1     Running   0          3m5s
+
+# Step 4.4: Check the `Ready` condition of the RayService.
+# The RayService is ready to serve requests when the condition is `True`.
+kubectl describe rayservices.ray.io rayservice-sample
+
+# [Example output]
+# Conditions:
+#   Last Transition Time:  2025-06-26T13:23:06Z
+#   Message:               Number of serve endpoints is greater than 0
+#   Observed Generation:   1
+#   Reason:                NonZeroServeEndpoints
+#   Status:                True
+#   Type:                  Ready
+
+# Step 4.5: List services in the `default` namespace.
+kubectl get services
+
+# NAME                               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                                         AGE
+# ...
+# rayservice-sample-cxm7t-head-svc   ClusterIP   None            <none>        10001/TCP,8265/TCP,6379/TCP,8080/TCP,8000/TCP   71m
+# rayservice-sample-head-svc         ClusterIP   None            <none>        10001/TCP,8265/TCP,6379/TCP,8080/TCP,8000/TCP   70m
+# rayservice-sample-serve-svc        ClusterIP   10.96.125.107   <none>        8000/TCP                                        70m
 ```
 
 ## 5) Uninstall
@@ -161,4 +118,3 @@ kubectl get crd | grep -i ray | awk '{print $1}' | xargs -I{} kubectl delete crd
 References:
 - KubeRay Helm charts: https://github.com/ray-project/kuberay-helm
 - KubeRay docs: https://docs.ray.io/en/latest/cluster/kubernetes/kuberay/getting-started.html
-
