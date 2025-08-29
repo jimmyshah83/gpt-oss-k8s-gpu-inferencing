@@ -19,12 +19,15 @@ spec:
                 env_vars:
                   VLLM_USE_V1: "1"
                 pip:
+                  - --extra-index-url https://wheels.vllm.ai/gpt-oss/
+                  - --extra-index-url https://download.pytorch.org/whl/nightly/cu128
+                  - --index-strategy unsafe-best-match
+                  - vllm==0.10.1+gptoss
                   - "transformers>=4.55.0"
               engine_kwargs:
                 dtype: "auto"
-                device: auto
                 max_num_seqs: 40
-                max_model_length: 1024
+                max_model_len: 1024
                 gpu_memory_utilization: 0.92
                 tensor_parallel_size: 2
                 pipeline_parallel_size: 1
