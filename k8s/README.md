@@ -40,11 +40,14 @@ kubectl get crd | grep -i ray
 
 `kubectl apply -f <Rayserve Deployment>`
 
-## 4) Monitor=
+## 4) Monitor
+
+```
+- Verify ray serve status
+kubectl get rayservice gpt-oss-120b-deploy -o yaml | yq '.status'
 
 - Ray Cluster
 * Deploying ray serve should deploy a cluster and service for me
-```
 kubectl api-resources --api-group=ray.io
 kubectl get rayclusters.ray.io -A
 kubectl get rayservices.ray.io -A
