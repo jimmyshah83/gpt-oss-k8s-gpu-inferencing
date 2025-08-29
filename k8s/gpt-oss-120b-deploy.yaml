@@ -15,6 +15,9 @@ spec:
               model_id: "gpt-oss-120b"
               model_name: "openai/gpt-oss-120b"
             accelerator_type: "H100"
+            runtime_env:
+              env_vars:
+                VLLM_USE_V1: "1"
             engine_kwargs:
               dtype: "auto"
               device: auto
@@ -44,10 +47,10 @@ spec:
             image: rayproject/ray-llm:2.46.0-py311-cu124
             resources:
               limits:
-                cpu: "8"
+                cpu: "2"
                 memory: "16Gi"
               requests:
-                cpu: "8"
+                cpu: "2"
                 memory: "16Gi"
             ports:
             - containerPort: 6379
@@ -93,6 +96,6 @@ spec:
                 nvidia.com/gpu: "2"
           tolerations:
             - effect: NoSchedule
-              key: workload
+              key: sku
               operator: Equal
               value: gpu
