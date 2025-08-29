@@ -40,7 +40,7 @@ kubectl get crd | grep -i ray
 
 `kubectl apply -f <Rayserve Deployment>`
 
-## 4) Monitor
+## 4) Monitor=
 
 - Ray Cluster
 * Deploying ray serve should deploy a cluster and service for me
@@ -99,6 +99,9 @@ kubectl get services
 # rayservice-sample-cxm7t-head-svc   ClusterIP   None            <none>        10001/TCP,8265/TCP,6379/TCP,8080/TCP,8000/TCP   71m
 # rayservice-sample-head-svc         ClusterIP   None            <none>        10001/TCP,8265/TCP,6379/TCP,8080/TCP,8000/TCP   70m
 # rayservice-sample-serve-svc        ClusterIP   10.96.125.107   <none>        8000/TCP                                        70m
+
+- Dashboard
+kubectl port-forward service/<ray head service name> 8265:8265
 ```
 
 ## 5) Uninstall

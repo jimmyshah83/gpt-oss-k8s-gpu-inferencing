@@ -1,39 +1,39 @@
 apiVersion: ray.io/v1
 kind: RayService
 metadata:
-  name: gpt-oss-120-deploy
+  name: gpt-oss-120b-deploy
   namespace: default
 spec:
   serveConfigV2: |
     applications:
-    - name: gpt-oss-120
-      route_prefix: /
-      import_path: ray.serve.llm:build_openai_app
-    - args:
-        llm_configs:
-          - model_loading_config:
-              model_id: "gpt-oss-120b"
-              model_name: "openai/gpt-oss-120b"
-            accelerator_type: "H100"
-            runtime_env:
-              env_vars:
-                VLLM_USE_V1: "1"
-            engine_kwargs:
-              dtype: "auto"
-              device: auto
-              max_num_seqs: 40
-              max_model_length: 1024
-              gpu_memory_utilization: 0.92
-              tensor_parallel_size: 2
-              pipeline_parallel_size: 1
-              enable_chunked_prefill: true
-              enable_prefix_caching: true
-            deployment_config:
-              autoscaling_config:
-                minReplicas: 1
-                maxReplicas: 1
-                target_ongoing_requests: 64
-              max_ongoing_requests: 128
+      - name: gpt-oss-120
+        route_prefix: /
+        import_path: ray.serve.llm:build_openai_app
+        args:
+          llm_configs:
+            - model_loading_config:
+                model_id: "gpt-oss-120b"
+                model_name: "openai/gpt-oss-120b"
+              accelerator_type: "H100"
+              runtime_env:
+                env_vars:
+                  VLLM_USE_V1: "1"
+              engine_kwargs:
+                dtype: "auto"
+                device: auto
+                max_num_seqs: 40
+                max_model_length: 1024
+                gpu_memory_utilization: 0.92
+                tensor_parallel_size: 2
+                pipeline_parallel_size: 1
+                enable_chunked_prefill: true
+                enable_prefix_caching: true
+              deployment_config:
+                autoscaling_config:
+                  minReplicas: 1
+                  maxReplicas: 1
+                  target_ongoing_requests: 64
+                max_ongoing_requests: 128
   rayClusterConfig:
     headGroupSpec:
       rayStartParams:
@@ -43,59 +43,59 @@ spec:
           nodeSelector:
             workload: ray
           containers:
-          - name: ray-head
-            image: rayproject/ray-llm:2.46.0-py311-cu124
-            resources:
-              limits:
-                cpu: "2"
-                memory: "16Gi"
-              requests:
-                cpu: "2"
-                memory: "16Gi"
-            ports:
-            - containerPort: 6379
-              name: gcs-server
-            - containerPort: 8265
-              name: dashboard
-            - containerPort: 10001
-              name: client
-            - containerPort: 8000
-              name: serve
-            env:
-            - name: HUGGING_FACE_HUB_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  key: token
-                  name: hf-token-secret                  
+            - name: ray-head
+              image: rayproject/ray-llm:2.46.0-py311-cu124
+              resources:
+                limits:
+                  cpu: "2"
+                  memory: "16Gi"
+                requests:
+                  cpu: "2"
+                  memory: "16Gi"
+              ports:
+                - containerPort: 6379
+                  name: gcs-server
+                - containerPort: 8265
+                  name: dashboard
+                - containerPort: 10001
+                  name: client
+                - containerPort: 8000
+                  name: serve
+              env:
+                - name: HUGGING_FACE_HUB_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      key: token
+                      name: hf-token-secret
           tolerations:
             - effect: NoSchedule
               key: workload
               operator: Equal
               value: ray
     workerGroupSpecs:
-    - replicas: 1
-      minReplicas: 1
-      maxReplicas: 4
-      groupName: gpu-group
-      rayStartParams: {}
-      template:
-        spec:
-          nodeSelector:
-            workload: gpu
-          containers:
-          - name: llm
-            image: rayproject/ray-llm:2.46.0-py311-cu124
-            env:
-            - name: HUGGING_FACE_HUB_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  key: token
-                  name: hf-token-secret
-            resources:
-              limits:
-                nvidia.com/gpu: "2"
-          tolerations:
-            - effect: NoSchedule
-              key: sku
-              operator: Equal
-              value: gpu
+      - replicas: 1
+        minReplicas: 1
+        maxReplicas: 4
+        groupName: gpu-group
+        rayStartParams: {}
+        template:
+          spec:
+            nodeSelector:
+              workload: gpu
+            containers:
+              - name: llm
+                image: rayproject/ray-llm:2.46.0-py311-cu124
+                env:
+                  - name: HUGGING_FACE_HUB_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        key: token
+                        name: hf-token-secret
+                resources:
+                  limits:
+                    nvidia.com/gpu: "2"
+            tolerations:
+              - effect: NoSchedule
+                key: sku
+                operator: Equal
+                value: gpu
