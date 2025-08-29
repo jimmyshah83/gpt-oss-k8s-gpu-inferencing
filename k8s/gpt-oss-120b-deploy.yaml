@@ -12,12 +12,14 @@ spec:
         args:
           llm_configs:
             - model_loading_config:
-                model_id: "gpt-oss-120b"
-                model_name: "openai/gpt-oss-120b"
+                model_id: "openai/gpt-oss-120b"
+                trust_remote_code: true
               accelerator_type: "H100"
               runtime_env:
                 env_vars:
                   VLLM_USE_V1: "1"
+                pip:
+                  - "transformers>=4.55.0"
               engine_kwargs:
                 dtype: "auto"
                 device: auto
