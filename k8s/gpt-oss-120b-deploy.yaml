@@ -7,21 +7,23 @@ spec:
   serveConfigV2: |
     applications:
       - name: gpt-oss-120
-        route_prefix: /
+        route_prefix: /gpt-oss-120
         import_path: ray.serve.llm:build_openai_app
+        runtime_env:
+          pip:
+            - "transformers>=4.55.0"
+            - "vllm"
         args:
           llm_configs:
             - model_loading_config:
-                model_id: "openai/gpt-oss-120b"
-                trust_remote_code: true
+                model_id: "gpt-oss-120b"
+                model_source: "openai/gpt-oss-120b"
               accelerator_type: "H100"
               runtime_env:
                 env_vars:
                   VLLM_USE_V1: "1"
                   PIP_EXTRA_INDEX_URL: "https://wheels.vllm.ai/gpt-oss/ https://download.pytorch.org/whl/nightly/cu128"
-                pip:
-                  - vllm==0.10.1+gptoss
-                  - "transformers>=4.55.0"
+                pip: ["vllm==0.10.1+gptoss"]
               engine_kwargs:
                 dtype: "auto"
                 max_num_seqs: 40
@@ -31,10 +33,11 @@ spec:
                 pipeline_parallel_size: 1
                 enable_chunked_prefill: true
                 enable_prefix_caching: true
+                trust_remote_code: true
               deployment_config:
                 autoscaling_config:
-                  minReplicas: 1
-                  maxReplicas: 4
+                  min_replicas: 1
+                  max_replicas: 4
                   target_ongoing_requests: 64
                 max_ongoing_requests: 128
   rayClusterConfig:
