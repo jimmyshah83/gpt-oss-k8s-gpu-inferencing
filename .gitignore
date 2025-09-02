@@ -215,3 +215,6 @@ infrastructure/terraform.tfstate.backup
 
 #Secrets
 k8s/hf-token-secret.yaml
+
+# Python
+uv.lock

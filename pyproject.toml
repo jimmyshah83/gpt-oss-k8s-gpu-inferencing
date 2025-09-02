@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gpt-oss-k8s-gpu-inferencing"
+version = "0.1.0"
+description = "GPU inferencing utilities and scripts (includes a simple HTTP load tester)."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["requests"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gpt_oss_k8s_gpu_inferencing"]
+
+[project.scripts]
+load-test-chat = "gpt_oss_k8s_gpu_inferencing.load_test_chat:main"

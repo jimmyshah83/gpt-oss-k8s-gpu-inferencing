@@ -1,4 +1,7 @@
-curl http://localhost:8000/gpt-oss-120/v1/chat/completions     -H "Content-Type: application/json"     -d '{
+POST /gpt-oss-120/v1/chat/completions HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+{
       "model": "gpt-oss-120b",
       "messages": [
             {"role": "system", "content": "You are a helpful assistant."},
