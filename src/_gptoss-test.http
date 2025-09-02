@@ -1,8 +1,8 @@
-POST http://localhost:8000/gpt-oss-120/v1/chat/completions
+POST http://localhost:8000/gpt-oss-20/v1/chat/completions
 Content-Type: application/json
  
 {
-      "model": "gpt-oss-120b",
+      "model": "gpt-oss-20b",
       "messages": [
             { "role": "system", "content": "You are a helpful assistant." },
             { "role": "user", "content": "Explain what MXFP4 quantization is." }

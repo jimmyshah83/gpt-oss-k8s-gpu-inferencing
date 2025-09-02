@@ -1,13 +1,12 @@
 """Load testing gpt-oss models on Kubernetes GPUs"""
 
 import os
-import random
 import requests
 
 def send_requests(msg: str, model: str):
     """Send a series of requests to the chat completions endpoint."""    
     for _ in range(10): 
-        response = requests.post(f"http://localhost:8000/{model}/v1/chat/completions", json={
+        response = requests.post("http://localhost:8000/gpt-oss-20/v1/chat/completions", json={
             "model": model,
             "messages": [
                 {"role": "system", "content": "You are a helpful assistant."},
@@ -30,10 +29,8 @@ def main():
     """Main function to run load tests."""
     test_messages = _load_questions()
 
-    models = ["gpt-oss-20b", "gpt-oss-120b"]
-    pairs = [(msg, random.choice(models)) for msg in test_messages]
-    for msg, model in pairs:
-        send_requests(msg, model)
+    for msg in test_messages:
+        send_requests(msg, "gpt-oss-20b")
 
 
 if __name__ == "__main__":
