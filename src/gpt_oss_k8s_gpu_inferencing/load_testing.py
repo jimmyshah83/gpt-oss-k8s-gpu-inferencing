@@ -1,11 +1,13 @@
 """Load testing gpt-oss models on Kubernetes GPUs"""
 
 import os
+import time
 import requests
 
 def send_requests(msg: str, model: str):
-    """Send a series of requests to the chat completions endpoint."""    
-    for _ in range(10): 
+    """Send a series of requests to the chat completions endpoint."""
+    start = time.perf_counter()
+    for _ in range(10):
         response = requests.post("http://localhost:8000/gpt-oss-20/v1/chat/completions", json={
             "model": model,
             "messages": [
@@ -16,6 +18,8 @@ def send_requests(msg: str, model: str):
         }, timeout=30)
         response.raise_for_status()
         print(response.json())
+    duration = time.perf_counter() - start
+    print(f"send_requests: completed 10 requests for model '{model}' in {duration:.3f}s")
 
 def _load_questions() -> list[str]:
     """Load questions from questions.txt located next to this module."""
